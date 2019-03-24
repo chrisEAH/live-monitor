@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Temperature Plot</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body>
+        <h1>Temperature Graph</h1>
+        <h4>Date: <span id="date"></span></h4>
+        <div class="chart-container" style="position: relative; width:75vw; margin: auto;">
+            <canvas id="myChart"></canvas>
+        </div>
+        <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.3/Chart.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+       
+        <script>
+            var socket = io.connect('http://localhost:6600'); //connect to server
+            var ctx = document.getElementById('myChart').getContext('2d');
+            var anzahl=0;
+
+            var data = {
+            labels: [0],
+            datasets: [{
+                data: [0],
+                label: 'Temperature',
+                backgroundColor: '#ff6600'
+            }]
+            }
+            var chart = new Chart(ctx, {
+                // The type of chart we want to create
+                type: 'line',
+                // The data for our dataset
+                data: data,
+                // Configuration options go here
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    legend: {
+                        display: false
+                    },
+                    scales: {
+                        yAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Temperatur'
+                            }
+                        }],
+                    }
+                }
+                
+            });
+            socket.on('temp', function(dataS) { //As a temp data is received 
+                console.log(dataS.temp); 
+                data.labels.push(moment().format('HH:mm:ss'));
+                data.datasets[0].data.push({y:dataS.temp}); 
+                //chart.data.labels.push(
+                chart.update(); //Update the graph.
+                anzahl++;
+            });
+        </script>
+    </body>
+    <style>
+        h1 {
+            text-align: center;
+            font-family: 'Lato', sans-serif;
+        }
+        h4 {
+            text-align: center;
+            font-family: 'Lato', sans-serif;
+        }
+        p {
+            text-align: center;
+            font-family: 'Lato', sans-serif;
+        }
+    </style>
+</html>
